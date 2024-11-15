@@ -1,18 +1,35 @@
-use minifb::{Window, WindowOptions};
+use iced::widget::{button, column, text, Column};
+
+#[derive(Default)]
+struct Counter {
+  value: i32,
+}
+
+#[derive(Debug, Clone)]
+enum Message {
+  Increment,
+  Decrement,
+}
+
+fn update(counter: &mut Counter, message: Message) {
+  match message {
+    Message::Increment => {
+      counter.value += 1;
+    }
+    Message::Decrement => {
+      counter.value -= 1;
+    }
+  }
+}
+
+fn view(counter: &Counter) -> Column<Message> {
+  column![
+    button("+").on_press(Message::Increment),
+    text(counter.value),
+    button("-").on_press(Message::Decrement)
+  ]
+}
 
 fn main() {
-  let width = 640;
-  let height = 480;
-  let mut buffer = vec![0; width * height];
-  let mut window = Window::new("Rust Window", width, height, WindowOptions::default())
-    .unwrap_or_else(|e| {
-      panic!("{}", e);
-    });
-
-  while window.is_open() && !window.is_key_down(minifb::Key::Escape) {
-    for i in buffer.iter_mut() {
-      *i = 0x000000;
-    }
-    window.update_with_buffer(&buffer, width, height).unwrap();
-  }
+  iced::run("Sample App", update, view).unwrap();
 }
