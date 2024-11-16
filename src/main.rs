@@ -1,35 +1,63 @@
-use iced::widget::{button, column, text, Column};
+use iced::{
+  widget::{button, column, row, text, text_input},
+  Element, Task,
+};
+mod search;
 
 #[derive(Default)]
-struct Counter {
-  value: i32,
+struct State {
+  url_str: String,
+  html_str: String,
 }
 
 #[derive(Debug, Clone)]
 enum Message {
-  Increment,
-  Decrement,
+  ContentChanged(String),
+  Search,
+  SearchCompleted(String),
 }
 
-fn update(counter: &mut Counter, message: Message) {
+fn update(state: &mut State, message: Message) -> Task<Message> {
   match message {
-    Message::Increment => {
-      counter.value += 1;
+    Message::ContentChanged(url_str) => {
+      state.url_str = url_str;
+      Task::none()
     }
-    Message::Decrement => {
-      counter.value -= 1;
+    Message::Search => {
+      let url_str = state.url_str.clone();
+      Task::perform(
+        async move { search::search(&url_str).unwrap() },
+        Message::SearchCompleted,
+      )
+    }
+    Message::SearchCompleted(html_str) => {
+      state.html_str = html_str;
+      Task::none()
     }
   }
 }
 
-fn view(counter: &Counter) -> Column<Message> {
-  column![
-    button("+").on_press(Message::Increment),
-    text(counter.value),
-    button("-").on_press(Message::Decrement)
-  ]
+fn view(state: &State) -> Element<Message> {
+  let text_input = text_input("Enter URL", &state.url_str).on_input(Message::ContentChanged);
+  let search_button = button("search").on_press(Message::Search);
+  let search_bar = row![text_input, search_button];
+
+  return column![search_bar.padding(45), text(&state.html_str)].into();
 }
 
-fn main() {
-  iced::run("Sample App", update, view).unwrap();
+fn main() -> iced::Result {
+  iced::application("Sample App", update, view)
+    .window(iced::window::Settings {
+      size: iced::Size {
+        width: 800.0,
+        height: 600.0,
+      },
+      platform_specific: iced::window::settings::PlatformSpecific {
+        titlebar_transparent: true,
+        title_hidden: true,
+        fullsize_content_view: true,
+      },
+      ..Default::default()
+    })
+    .run()
 }
