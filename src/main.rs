@@ -22,18 +22,18 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
   match message {
     Message::ContentChanged(url_str) => {
       state.url_str = url_str;
-      Task::none()
+      return Task::none();
     }
     Message::Search => {
       let url_str = state.url_str.clone();
-      Task::perform(
+      return Task::perform(
         async move { search::search(&url_str).unwrap() },
         Message::SearchCompleted,
-      )
+      );
     }
     Message::SearchCompleted(html_str) => {
       state.html_str = html_str;
-      Task::none()
+      return Task::none();
     }
   }
 }
