@@ -1,6 +1,7 @@
 use iced::{
   widget::{button, column, row, text, text_input},
-  Element, Task,
+  window::settings::{PlatformSpecific, Settings},
+  Element, Size, Task,
 };
 mod search;
 
@@ -46,18 +47,18 @@ fn view(state: &State) -> Element<Message> {
 }
 
 fn main() -> iced::Result {
-  iced::application("Sample App", update, view)
-    .window(iced::window::Settings {
-      size: iced::Size {
-        width: 800.0,
-        height: 600.0,
+  return iced::application("Sample App", update, view)
+    .window(Settings {
+      size: Size {
+        width: 640.0,
+        height: 480.0,
       },
-      platform_specific: iced::window::settings::PlatformSpecific {
+      platform_specific: PlatformSpecific {
         titlebar_transparent: true,
         title_hidden: true,
         fullsize_content_view: true,
       },
       ..Default::default()
     })
-    .run()
+    .run();
 }
