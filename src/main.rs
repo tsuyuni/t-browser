@@ -3,6 +3,8 @@ use iced::{
   window::settings::{PlatformSpecific, Settings},
   Element, Size, Task,
 };
+// mod parser;
+mod parser;
 mod search;
 
 #[derive(Default)]
@@ -33,6 +35,7 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
     }
     Message::SearchCompleted(html_str) => {
       state.html_str = html_str;
+      parser::parser(&state.html_str);
       return Task::none();
     }
   }
