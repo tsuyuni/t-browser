@@ -1,6 +1,13 @@
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+use iced::{
+  widget::{self, Column, Container},
+  Color, Length,
+};
+
+use crate::Message;
+
+#[derive(Debug, PartialEq, Default)]
 pub struct Node {
   node_type: NodeType,
   children: Vec<Node>,
@@ -12,12 +19,28 @@ enum NodeType {
   Element(Element),
 }
 
-#[derive(Debug, PartialEq)]
+impl NodeType {
+  fn as_text(&self) -> Option<&Text> {
+    if let NodeType::Text(ref text) = *self {
+      Some(text)
+    } else {
+      None
+    }
+  }
+}
+
+impl Default for NodeType {
+  fn default() -> Self {
+    NodeType::Element(Element::default())
+  }
+}
+
+#[derive(Debug, PartialEq, Default)]
 struct Text {
   value: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 struct Element {
   tag_name: String,
   attributes: HashMap<String, String>,

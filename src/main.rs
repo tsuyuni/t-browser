@@ -1,8 +1,9 @@
 use iced::{
-  widget::{button, column, row, text, text_input},
+  widget::{self, button, column, container::Style, row, text_input, Container, Text},
   window::settings::{PlatformSpecific, Settings},
-  Element, Size, Task,
+  Background, Color, Element, Length, Size, Task,
 };
+
 // mod parser;
 mod parser;
 mod search;
@@ -11,6 +12,7 @@ mod search;
 struct State {
   url_str: String,
   html_str: String,
+  parsed_node: parser::Node,
 }
 
 #[derive(Debug, Clone)]
@@ -35,7 +37,17 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
     }
     Message::SearchCompleted(html_str) => {
       state.html_str = html_str;
-      parser::parser(&state.html_str);
+      // parser::parser(&state.html_str);
+      state.parsed_node = parser::parser("
+      <html>
+        <body>
+          <div>
+            <h1>heading</h1>
+            <p>text</p>
+          </div>
+        </body>
+      </html>
+      ");
       return Task::none();
     }
   }
@@ -46,7 +58,46 @@ fn view(state: &State) -> Element<Message> {
   let search_button = button("search").on_press(Message::Search);
   let search_bar = row![text_input, search_button];
 
-  return column![search_bar.padding(45), text(&state.html_str)].into();
+  let render = Container::new(
+    Container::new(
+      Container::new(
+        column![
+          widget::Text::new("Example Domain")
+            .style(|_theme| widget::text::Style {
+              color: Some(Color::BLACK),
+            })
+            .size(32),
+      
+          widget::Text::new("This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.")
+            .style(|_theme| widget::text::Style {
+              color: Some(Color::BLACK),
+            })
+            .size(16),
+          
+          Container::new(
+            widget::Text::new("More information...")
+              .style(|_theme| widget::text::Style {
+                color: Some(Color::from_rgb(0.0, 0.0, 1.0)),
+              })
+              .size(16)
+          )
+        ]
+      )
+        .width(Length::Fill)
+        .height(Length::Shrink)
+    )
+      .width(Length::Fill)
+      .height(Length::Fill)
+      .padding([8, 8])
+  )
+    .width(Length::Fill)
+    .height(Length::Fill)
+    .style(|_theme| Style {
+      background: Some(Background::Color(Color::WHITE)),
+      ..Style::default()
+    });
+
+  return column![search_bar.padding(45), render].into();
 }
 
 fn main() -> iced::Result {
